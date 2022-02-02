@@ -1,0 +1,6 @@
+When and why preprocess data :
+    https://mrmint.fr/data-preprocessing-feature-scaling-python
+
+Quantile are gud :
+    https://www.geeksforgeeks.org/how-to-convert-float-to-int-in-python/
+
