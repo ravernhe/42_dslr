@@ -4,3 +4,7 @@ When and why preprocess data :
 Quantile are gud :
     https://www.geeksforgeeks.org/how-to-convert-float-to-int-in-python/
 
+kcosta dslr :
+    https://github.com/kcosta42/DSLR
+
+
