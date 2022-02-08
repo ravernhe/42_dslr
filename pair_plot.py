@@ -6,16 +6,16 @@ import pandas as pd
 
 def pair_plot_hist(ax, X, indexX, indexY):
     h1 = X[:326].to_numpy()
-    ax[indexX, indexY].hist(h1, alpha=0.5)
+    ax[indexX, indexY].hist(h1, color='red', alpha=0.5)
 
     h2 = X[326:855].to_numpy()
-    ax[indexX, indexY].hist(h2, alpha=0.5)
+    ax[indexX, indexY].hist(h2, color='yellow', alpha=0.5)
 
     h3 = X[855:1298].to_numpy()
-    ax[indexX, indexY].hist(h3, alpha=0.5)
+    ax[indexX, indexY].hist(h3, color='blue', alpha=0.5)
 
     h4 = X[1298:].to_numpy()
-    ax[indexX, indexY].hist(h4, alpha=0.5)
+    ax[indexX, indexY].hist(h4, color='green', alpha=0.5)
 
 def pair_plot_scatter(ax, X, y, indexX, indexY):
     ax[indexX, indexY].scatter(X[:326], y[:326], s=1, color='red', alpha=0.5)

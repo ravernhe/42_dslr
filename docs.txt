@@ -12,3 +12,6 @@ Regression logistique :
 
 Easy Basic :
     https://mrmint.fr/logistic-regression-machine-learning-introduction-simple
+
+Best Doc :
+    https://www.baeldung.com/cs/gradient-descent-logistic-regression
