@@ -7,4 +7,8 @@ Quantile are gud :
 kcosta dslr :
     https://github.com/kcosta42/DSLR
 
+Regression logistique :
+    https://www.xlstat.com/fr/solutions/fonctionnalites/regression-logistique-pour-reponse-binaires-et-multinomiales-logit-probit#:~:text=Le%20principe%20du%20mod%C3%A8le%20de,m%C3%A9dicament%2C%20un%20patient%20sera%20gu%C3%A9ri.
 
+Easy Basic :
+    https://mrmint.fr/logistic-regression-machine-learning-introduction-simple
