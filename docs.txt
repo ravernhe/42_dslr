@@ -15,3 +15,9 @@ Easy Basic :
 
 Best Doc :
     https://www.baeldung.com/cs/gradient-descent-logistic-regression
+
+Jay PATEL :
+    https://github.com/Jaimin09/Coding-Lane-Assets/blob/main/Logistic%20Regression%20in%20Python%20from%20Scratch/Logistic%20Regression%20-%20Titanic.ipynb
+
+One-vs-all :
+    https://medium.com/analytics-vidhya/logistic-regression-from-scratch-multi-classification-with-onevsall-d5c2acf0c37c
