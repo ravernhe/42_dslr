@@ -10,9 +10,9 @@ def sigmoid(z):
 def format_list(W):
     W_tmp = []
     for each in W :
-        each = each.replace("[", "")
-        each = each.replace("]", "")
-        print(each)
+        # each = each.replace("[", "")
+        # each = each.replace("]", "")
+        # print(each)
         W_tmp.append(float(each))
     return W_tmp
 
@@ -55,7 +55,7 @@ def parse_weight(W):
     except :
         print("Can't open file")
         return 0
-    print(list(weight.iloc[0]))
+    # print(list(weight.iloc[0]))
     for i in range (4):
         W.append(list(weight.iloc[i]))
     return W
@@ -72,10 +72,10 @@ def choixpeau(predicted):
     count = 0
     house = []
     max = [0.0,0]
-    print(len(predicted))
+    print(len(predicted) / 4)
     i = 1
     for each in predicted :
-        print(i, " : ", each)
+        # print(i, " : ", each)
         if each > max[0] :
             max[0] = float(each)
             max[1] = i

@@ -3,10 +3,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-HOUSES_COL = "Hogwarts House"
-SELECTED_FEATURES = ["Astronomy","Herbology","Defense Against the Dark Arts","Divination","Ancient Runes","Charms"]
-T0_LABEL = "t0"
-
 class Log_reg():
     def __init__(self, iter=10000, eta=0.0015) -> None:
         # self.df = df
@@ -20,39 +16,43 @@ class Log_reg():
         for each in self.houses :
             f = lambda x: 0 if x != each else 1
             Y = Y_train.map(f)
-            Y = Y.values
 
+            Y = Y.values
+            Y = Y.reshape(1, X_train.shape[1])
+
+            X_train = self.normalize(X_train)
             self.binary_classifier(X_train, Y, self.eta, self.iter)
-        # print(self.W)
+            # print(each, ":")
+            # print(W)        
 
     def binary_classifier(self, X_train, Y_train, eta, iter):
-        m, n = X_train.shape
-        # print(n)
-        W = np.zeros(n)
-        # B = 0
+        # m = X_train.shape[1]
+        n, m = X_train.shape
+
+        W = np.zeros((n,1))
+        B = 0
 
         cost_list = []
         for i in range(self.iter):
-            Z = np.dot(X_train, W)
+                
+            Z = np.dot(W.T, X_train) + B
             A = self.sigmoid(Z)
             
             # cost function
-            # cost = -(1.0 / m) * np.sum(Y_train * np.log(A) + (1.0 - Y_train) * np.log(1.0 - A))
-            cost = (1 / m) * (np.dot(-Y_train.T, np.log(A)) - np.dot((1 - Y_train).T, np.log(1 - A)))
-
+            # print(Y_train * np.log(A))
+            # exit(0)
+            cost = (-(1.0 / m)) * np.sum(Y_train * np.log(A) + (1.0 - Y_train) * np.log(1.0 - A))
             # Gradient Descent
-            # dW = (1 / m) * np.dot(A - Y_train, X_train.T)
-            dW = np.dot(X_train.T, (A - Y_train)) / Y_train.size
-            # dB = (1 / m) * np.sum(A - Y_train)
+            dW = (1 / m) * np.dot(A - Y_train, X_train.T)
+            dB = (1 / m) * np.sum(A - Y_train)
             
-            W -= self.eta * dW.T
-            # B -= self.eta * dB
-
+            W = W - self.eta * dW.T
+            
+            B = B - self.eta * dB
             # Keeping track of our cost function value
             cost_list.append(cost)
             # if(i%(iter/10000) == 0):
             #     print("cost after ", i, "iteration is : ", cost)
-
 
         self.W.append(W)
         self.cost.append(cost_list)
@@ -73,10 +73,10 @@ class Log_reg():
 
     def save(self, filename='./datasets/weights.csv'):
         f = open(filename, 'w+')
-        # features = ["Astronomy","Herbology","Defense Against the Dark Arts","Divination","Ancient Runes","Charms"]
+        features = ["Astronomy","Herbology","Defense Against the Dark Arts","Divination","Ancient Runes","Charms"]
         i = 0
-        for feat in SELECTED_FEATURES:
-            if (i < len(SELECTED_FEATURES) - 1) :
+        for feat in features:
+            if (i < len(features) - 1) :
                 f.write(f'{feat},')
             else :
                 f.write(f'{feat}\n')
@@ -85,7 +85,7 @@ class Log_reg():
         for each in self.W :
             j = 0
             for i in range (len(each)) :
-                if (j < len(SELECTED_FEATURES) - 1) :
+                if (j < len(features) - 1) :
                     f.write(f'{each[i]},')
                 else :
                     f.write(f'{each[i]}')
@@ -123,35 +123,30 @@ class Log_reg():
     
     # print("Accuracy of the model is : ", round(acc, 2), "%")
 
-def normalize(X):
-        return (X - X.mean()) / X.std()
+def clean_dataframe(X_train):
+    droped = ["Index","Arithmancy","Muggle Studies","History of Magic","Transfiguration","Potions","Care of Magical Creatures","Flying"]
 
-def clean_dataframe(df):
-    # droped = ["Index","Arithmancy","Muggle Studies","History of Magic","Transfiguration","Potions","Care of Magical Creatures","Flying"]
-    # features = ["Astronomy","Herbology","Defense Against the Dark Arts","Divination","Ancient Runes","Charms"]
-
-    selected_features = [HOUSES_COL] + [T0_LABEL] + SELECTED_FEATURES
-    # df = normalize(df)
-    # X_train = df.loc[2:, selected_features]
-    X_train = normalize(df.loc[:, selected_features[2:]])
-    # X_train.insert(0, T0_LABEL, np.ones(X_train.shape[0]))
-    X_train.insert(0, "Hogwarts House", df["Hogwarts House"])
     X_train = X_train.dropna()
-
     Y_train = X_train["Hogwarts House"]
-    X_train = X_train.drop("Hogwarts House", axis=1)
+    X_train = X_train.select_dtypes("number")
+
+    for each in droped :
+        X_train = X_train.drop(each, axis=1)
+
+    X_train = X_train.values.T
+
     return X_train, Y_train
 
 def main(filename):
-    # houses = ["Gryffindor", "Hufflepuff", "Ravenclaw", "Slytherin"]
+    houses = ["Gryffindor", "Hufflepuff", "Ravenclaw", "Slytherin"]
     # features = ["Index","Arithmancy","Astronomy","Herbology","Defense Against the Dark Arts","Divination","Muggle Studies","Ancient Runes","History of Magic","Transfiguration","Potions","Care of Magical Creatures","Charms","Flying"]
     try :
-        df = pd.read_csv(filename)
+        X_train = pd.read_csv(filename)
     except :
         print("Can't open file")
         return 0
 
-    X_train, Y_train = clean_dataframe(df)
+    X_train, Y_train = clean_dataframe(X_train)
     logreg = Log_reg(10000, 0.0015)
     logreg.one_vs_all(X_train, Y_train)
     logreg.save()
