@@ -2,10 +2,7 @@ import argparse
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-
-HOUSES_COL = "Hogwarts House"
-SELECTED_FEATURES = ["Astronomy","Herbology","Defense Against the Dark Arts","Ancient Runes","Charms"]
-T0_LABEL = "t0"
+from sklearn import datasets
 
 def sigmoid(z):
     return (1.0 / (1.0 + np.exp(-z)))
@@ -13,13 +10,17 @@ def sigmoid(z):
 def format_list(W):
     W_tmp = []
     for each in W :
+        # each = each.replace("[", "")
+        # each = each.replace("]", "")
+        # print(each)
         W_tmp.append(float(each))
     return W_tmp
 
 def predict(X, W):
+    features = ["Astronomy","Herbology","Defense Against the Dark Arts","Divination","Ancient Runes","Charms"]
     houses = ["Gryffindor", "Hufflepuff", "Ravenclaw", "Slytherin"]
     A = []
-    len_feature = len(SELECTED_FEATURES)
+    len_feature = len(features)
     mapping = [float] * len_feature
     mapping = np.reshape(mapping, (1,len_feature))
     for j in range(len(X[1])) :
@@ -33,37 +34,48 @@ def predict(X, W):
             A.append(sigmoid(Z))
     return A
 
-def clean_dataframe(df, std, mean):
-    selected_features = [HOUSES_COL] + [T0_LABEL] + SELECTED_FEATURES
-    X_test = normalize(df.loc[:, selected_features[2:]], std, mean)
-    X_test = X_test.fillna(method='ffill') # Verif
+def clean_dataframe(X_test):
+    droped = ["Index","Arithmancy","Muggle Studies","History of Magic","Transfiguration","Potions","Care of Magical Creatures","Flying","Hogwarts House"]
+    X_test = X_test.select_dtypes("number")
+    
+    for each in droped :
+        X_test = X_test.drop(each, axis=1)
+
+    X_test = X_test.dropna()
     X_test = X_test.values.T
+
     return X_test
 
-def normalize(X, std, mean):
-    return (X - mean) / std
+def normalize(X):
+    return (X - X.mean()) / X.std()
 
 def parse_weight(W):
-    std = []
-    mean = []
     try :
         weight = pd.read_csv("./datasets/weights.csv")
     except :
         print("Can't open file")
         return 0
+    # print(list(weight.iloc[0]))
     for i in range (4):
         W.append(list(weight.iloc[i]))
+    return W
 
-    std = list(weight.iloc[4])
-    mean = list(weight.iloc[5])
-    return W, std, mean
+# def visualizastion():
+    # for each in houses :
+        # plt.plot(np.arange(iter), cost_list)
+        # plt.title(each)
+        # plt.ylabel("Cost")
+        # plt.xlabel("Itération")
+        # plt.show()
 
 def choixpeau(predicted):
     count = 0
     house = []
     max = [0.0,0]
+    print(len(predicted) / 4)
     i = 1
     for each in predicted :
+        # print(i, " : ", each)
         if each > max[0] :
             max[0] = float(each)
             max[1] = i
@@ -73,30 +85,29 @@ def choixpeau(predicted):
             max = [0.0,0]
         i += 1
         count += 1
+    # house.append(max[1])
     return (house)
-
-def print_choix(prediction, filename='./houses.csv') :
-    f = open(filename, 'w+')
-    houses = ["Gryffindor", "Hufflepuff", "Ravenclaw", "Slytherin"]
-    i = 0
-    f.write("Index,Hogwarts House\n")
-    for each in prediction :
-        f.writelines([f'{i}',',',f'{houses[each - 1]}','\n'])
-        i += 1
 
 def main(filename):
     W = []
     prediction = []
+    # features = ["Index","Arithmancy","Astronomy","Herbology","Defense Against the Dark Arts","Divination","Muggle Studies","Ancient Runes","History of Magic","Transfiguration","Potions","Care of Magical Creatures","Charms","Flying"]
     try :
         X_test = pd.read_csv(filename)
     except :
         print("Can't open file")
         return 0
-    W, std, mean = parse_weight(W)
-    X_test = clean_dataframe(X_test, std, mean)
+    W = parse_weight(W)
+    X_test = clean_dataframe(X_test)
+    X_test = normalize(X_test)
     prediction = predict(X_test, W)
-    prediction = choixpeau(prediction)
-    print_choix(prediction)
+    i = 0
+    # for each in prediction :
+    #     if i % 4 == 0 :
+    #         print(i / 4, "\n")
+    #     print(each, "\n")
+    #     i += 1
+    print(choixpeau(prediction))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

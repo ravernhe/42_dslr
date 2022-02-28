@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 HOUSES_COL = "Hogwarts House"
-SELECTED_FEATURES = ["Astronomy","Herbology","Defense Against the Dark Arts","Divination","Ancient Runes","Charms"]
+SELECTED_FEATURES = ["Astronomy","Herbology","Defense Against the Dark Arts","Ancient Runes","Charms"]
 T0_LABEL = "t0"
 
 class Log_reg():
@@ -21,13 +21,10 @@ class Log_reg():
             f = lambda x: 0 if x != each else 1
             Y = Y_train.map(f)
             Y = Y.values
-
             self.binary_classifier(X_train, Y, self.eta, self.iter)
-        # print(self.W)
 
     def binary_classifier(self, X_train, Y_train, eta, iter):
         m, n = X_train.shape
-        # print(n)
         W = np.zeros(n)
         # B = 0
 
@@ -71,9 +68,10 @@ class Log_reg():
         for i in range (len(self.houses)) :
             print(self.houses[i], " :\n", self.W[i])
 
-    def save(self, filename='./datasets/weights.csv'):
+    def save(self, std_deviations, means, filename='./datasets/weights.csv'):
         f = open(filename, 'w+')
-        # features = ["Astronomy","Herbology","Defense Against the Dark Arts","Divination","Ancient Runes","Charms"]
+        std = list(std_deviations)
+        mean = list(means)
         i = 0
         for feat in SELECTED_FEATURES:
             if (i < len(SELECTED_FEATURES) - 1) :
@@ -81,17 +79,27 @@ class Log_reg():
             else :
                 f.write(f'{feat}\n')
             i += 1
-
+        # f.write(f'std,')
+        # f.write(f'means\n')
         for each in self.W :
-            j = 0
             for i in range (len(each)) :
-                if (j < len(SELECTED_FEATURES) - 1) :
+                if (i < len(SELECTED_FEATURES) - 1) :
                     f.write(f'{each[i]},')
                 else :
                     f.write(f'{each[i]}')
-                j += 1
             f.write('\n')
 
+        for i in range(len(SELECTED_FEATURES)) :
+            if (i < len(SELECTED_FEATURES) - 1) :
+                f.write(f'{std[i]},')
+            else :
+                f.write(f'{std[i]}\n')
+
+        for i in range(len(SELECTED_FEATURES)) :
+            if (i < len(SELECTED_FEATURES) - 1) :
+                f.write(f'{mean[i]},')
+            else :
+                f.write(f'{mean[i]}\n')
     # def accuracy(X, Y, W, B):
         # Z = np.dot(W.T, X) + B
         # A = sigmoid(Z)
@@ -124,7 +132,7 @@ class Log_reg():
     # print("Accuracy of the model is : ", round(acc, 2), "%")
 
 def normalize(X):
-        return (X - X.mean()) / X.std()
+        return X.std(), X.mean(), (X - X.mean()) / X.std()
 
 def clean_dataframe(df):
     # droped = ["Index","Arithmancy","Muggle Studies","History of Magic","Transfiguration","Potions","Care of Magical Creatures","Flying"]
@@ -133,14 +141,14 @@ def clean_dataframe(df):
     selected_features = [HOUSES_COL] + [T0_LABEL] + SELECTED_FEATURES
     # df = normalize(df)
     # X_train = df.loc[2:, selected_features]
-    X_train = normalize(df.loc[:, selected_features[2:]])
+    std_deviations, means, X_train = normalize(df.loc[:, selected_features[2:]])
     # X_train.insert(0, T0_LABEL, np.ones(X_train.shape[0]))
     X_train.insert(0, "Hogwarts House", df["Hogwarts House"])
     X_train = X_train.dropna()
 
     Y_train = X_train["Hogwarts House"]
     X_train = X_train.drop("Hogwarts House", axis=1)
-    return X_train, Y_train
+    return std_deviations, means, X_train, Y_train
 
 def main(filename):
     # houses = ["Gryffindor", "Hufflepuff", "Ravenclaw", "Slytherin"]
@@ -151,10 +159,10 @@ def main(filename):
         print("Can't open file")
         return 0
 
-    X_train, Y_train = clean_dataframe(df)
+    std_deviations, means, X_train, Y_train = clean_dataframe(df)
     logreg = Log_reg(10000, 0.0015)
     logreg.one_vs_all(X_train, Y_train)
-    logreg.save()
+    logreg.save(std_deviations, means)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
