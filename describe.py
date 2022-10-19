@@ -11,7 +11,10 @@ class Describe :
     
     def create_dataframe(self):
         try:
-            return pd.read_csv(self.file_name).select_dtypes("number").dropna(axis=1, how='all')
+            df = pd.read_csv(self.file_name).select_dtypes("number").dropna(axis=1, how='all')
+            if "Index" in df:
+                df = df.drop('column_name', axis=1)
+            return df
         except:
             raise Exception("File not found or error while opening the file")
 
