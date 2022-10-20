@@ -1,7 +1,23 @@
 import argparse
-from srcs.histogram_class import Histogram
-import matplotlib.pyplot as plt
 import pandas as pd
+import matplotlib.pyplot as plt
+
+def create_histogram(df, course, legend, xlabel, ylabel, ax=None):
+        
+    if not ax:
+        fig, ax = plt.subplots()
+
+    x = df.loc["Gryffindor"][course]
+    y = df.loc["Hufflepuff"][course]
+    z = df.loc["Ravenclaw"][course]
+    a = df.loc["Slytherin"][course]
+
+    ax.hist(x, histtype="stepfilled", align="mid", color="red", alpha=0.5)
+    ax.hist(y, histtype="stepfilled", align="mid", color="yellow", alpha=0.5)
+    ax.hist(z, histtype="stepfilled", align="mid", color="blue", alpha=0.5)
+    ax.hist(a, histtype="stepfilled", align="mid", color="green", alpha=0.5)
+
+    return ax
 
 
 def histogram(course):
@@ -10,14 +26,22 @@ def histogram(course):
     ylabel = "Numbers of students"
 
     df = pd.read_csv("./datasets/dataset_train.csv", index_col = "Hogwarts House")
-    if course != "all" and not course in df:
-        raise Exception("Course not found in dataset")
     if "Index" in df:
         df = df.drop('Index', axis=1)
     df = df.sort_index()
+    if course != "all" and not course in df:
+        raise Exception("Course not found in dataset")
 
-    histogram = Histogram(df, legend, xlabel, ylabel)
-    histogram.draw_histogram(course)
+    if course == "all":
+        for name in df.select_dtypes("number"):
+            ax = create_histogram(df, name, legend, xlabel, ylabel)
+            ax.set(xlabel=xlabel, ylabel=ylabel, title=course)
+            ax.legend(legend, loc='upper right', frameon=False)
+    else:
+        ax = create_histogram(df, course, legend, xlabel, ylabel)
+        ax.set(xlabel=xlabel, ylabel=ylabel, title=course)
+        ax.legend(legend, loc='upper right', frameon=False)
+    plt.show()
     
 
 if __name__ == "__main__":
