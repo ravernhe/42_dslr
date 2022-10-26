@@ -14,26 +14,30 @@ class LogReg():
         self.eta = eta
         self.X = X
         self.y = None
+        self.cost = {}
 
     def one_vs_all(self) :
         for house in self.X.index.unique():
             self.y = self.X.index.map(lambda x: 0 if x != house else 1)
-            self.binary_classifier()
+            self.cost[house] = self.binary_classifier()
         print(self.W)
 
     def binary_classifier(self):
-        W = np.zeros(len(self.X.columns))
-
+        m, n = self.X.shape
+        W = np.zeros(n)
+        cost_list = []
+        
         for _ in range(self.iter):
             Z = np.dot(self.X, W)
             A = self.sigmoid(Z)
             
-
             dW = np.dot(self.X.T, (A - self.y)) / self.y.size
-            
             W -= self.eta * dW.T
 
+            cost_list.append((1 / m) * (np.dot(-self.y.T, np.log(A)) - np.dot((1 - self.y).T, np.log(1 - A))))
+
         self.W.append(W)
+        return cost_list
 
     def sigmoid(self, Z):
         return (1.0 / (1.0 + np.exp(-Z)))
