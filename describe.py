@@ -11,7 +11,7 @@ class Describe :
     
     def create_dataframe(self):
         try:
-            df = pd.read_csv(self.file_name).select_dtypes("number").dropna(axis=1, how='all')
+            df = pd.read_csv(self.file_name, index_col = "Hogwarts House").select_dtypes("number").dropna(axis=1, how='all')
             if "Index" in df:
                 df = df.drop('Index', axis=1)
             return df

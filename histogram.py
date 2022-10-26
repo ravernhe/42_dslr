@@ -25,17 +25,21 @@ def histogram(course):
     xlabel = "Grades"
     ylabel = "Numbers of students"
 
-    df = pd.read_csv("./datasets/dataset_train.csv", index_col = "Hogwarts House")
-    if "Index" in df:
-        df = df.drop('Index', axis=1)
-    df = df.sort_index()
+
+    try:
+        df = pd.read_csv("./datasets/dataset_train.csv", index_col = "Hogwarts House").select_dtypes("number").sort_index()
+        if "Index" in df:
+            df = df.drop('Index', axis=1)
+    except:
+        raise Exception("File not found or error while opening the file")
+
     if course != "all" and not course in df:
         raise Exception("Course not found in dataset")
 
     if course == "all":
-        for name in df.select_dtypes("number"):
+        for name in df:
             ax = create_histogram(df, name, legend, xlabel, ylabel)
-            ax.set(xlabel=xlabel, ylabel=ylabel, title=course)
+            ax.set(xlabel=xlabel, ylabel=ylabel, title=name)
             ax.legend(legend, loc='upper right', frameon=False)
     else:
         ax = create_histogram(df, course, legend, xlabel, ylabel)

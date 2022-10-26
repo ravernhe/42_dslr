@@ -6,12 +6,15 @@ from scatter_plot import create_scatter
 def pair_plot():
     legend = ['Grynffindor', 'Hufflepuff', 'Ravenclaw', 'Slytherin']
 
-    df = pd.read_csv("./datasets/dataset_train.csv", index_col = "Hogwarts House")
-    df = df.select_dtypes("number").dropna(axis=1, how='all')
-    if "Index" in df:
-        df = df.drop('Index', axis=1)
+    try:
+        df = pd.read_csv("./datasets/dataset_train.csv", index_col = "Hogwarts House").select_dtypes("number")
+        if "Index" in df:
+            df = df.drop('Index', axis=1)
+    except:
+        raise Exception("File not found or error while opening the file")
 
-    size = len(df.columns)
+
+    size = len(df.columns)  
     fig, axs = plt.subplots(nrows=size, ncols=size, figsize=(20, 13))
 
     for y, ycourses in enumerate(df.columns):

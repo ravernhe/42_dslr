@@ -19,10 +19,16 @@ def create_scatter(df, legend, xlabel, ylabel, ax=None):
 def scatter_plot(xlabel, ylabel):
     legend = ['Grynffindor', 'Hufflepuff', 'Ravenclaw', 'Slytherin']
 
-    df = pd.read_csv("./datasets/dataset_train.csv", index_col= "Hogwarts House")
-    df = df.sort_index()
+    try:
+        df = pd.read_csv("./datasets/dataset_train.csv", index_col = "Hogwarts House").select_dtypes("number").sort_index()
+        if "Index" in df:
+            df = df.drop('Index', axis=1)
+    except:
+        raise Exception("File not found or error while opening the file")
+
     if not xlabel in df or not ylabel in df:
         raise Exception("Course not found in dataset")
+
     ax = create_scatter(df, legend, xlabel, ylabel) 
     ax.set(xlabel=xlabel, ylabel=ylabel)
     ax.legend(legend, loc='upper right', frameon=False)
