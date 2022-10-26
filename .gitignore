@@ -1,2 +1,5 @@
 __pycache__/
 datasets/weights.csv
+dataset_truth.csv
+evaluate.py
+houses.csv

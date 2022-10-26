@@ -1,79 +1,38 @@
 import argparse
-import matplotlib.pyplot as plt
+import csv
 import numpy as np
 import pandas as pd
+from describe import Describe
 
-HOUSES_COL = "Hogwarts House"
-SELECTED_FEATURES = ["Astronomy","Herbology","Defense Against the Dark Arts","Ancient Runes","Charms"]
-T0_LABEL = "t0"
+SELECTED_FEATURES = ["Defense Against the Dark Arts","Divination","Charms", "History of Magic", "Ancient Runes"]
 
-def sigmoid(z):
-    return (1.0 / (1.0 + np.exp(-z)))
+class LogRegPredict():
+    def __init__(self, X, W) -> None:
+        self.X = X
+        self.W = W
+        self.predict_score = []
 
-def format_list(W):
-    W_tmp = []
-    for each in W :
-        W_tmp.append(float(each))
-    return W_tmp
+    def sigmoid(self, Z):
+        return (1.0 / (1.0 + np.exp(-Z)))
 
-def predict(X, W):
-    houses = ["Gryffindor", "Hufflepuff", "Ravenclaw", "Slytherin"]
-    A = []
-    len_feature = len(SELECTED_FEATURES)
-    mapping = [float] * len_feature
-    mapping = np.reshape(mapping, (1,len_feature))
-    for j in range(len(X[1])) :
-        for i in range (0, len_feature) :
-            mapping[0][i] = X[i][j]
-        for house in range(len(houses)) :
-            tmp = format_list(W[house])
-            tmp = pd.DataFrame(tmp)
-            tmp = tmp.values.T
-            Z = float(np.dot(tmp, np.matrix(mapping).T))
-            A.append(sigmoid(Z))
-    return A
+    def predict(self):
+        for i, row in self.X.iterrows():
+            score = {}
+            for house in self.W.columns:
+                Z = np.dot(row, self.W[house])
+                A = self.sigmoid(Z)
+                score[house] = A
+            self.predict_score.append(score)
+    
+    def choixpeau(self):
+        house = []
+        with open('houses.csv', 'w') as f:
+            w = csv.writer(f)
+            w.writerow(["Index", "Hogwarts House"])
+            for i, row in enumerate(self.predict_score):
+                w.writerow([i, max(row, key=row.get)])
 
-def clean_dataframe(df, std, mean):
-    selected_features = [HOUSES_COL] + [T0_LABEL] + SELECTED_FEATURES
-    X_test = normalize(df.loc[:, selected_features[2:]], std, mean)
-    X_test = X_test.fillna(method='ffill') # Verif
-    X_test = X_test.values.T
-    return X_test
 
-def normalize(X, std, mean):
-    return (X - mean) / std
-
-def parse_weight(W):
-    std = []
-    mean = []
-    try :
-        weight = pd.read_csv("./datasets/weights.csv")
-    except :
-        print("Can't open file")
-        return 0
-    for i in range (4):
-        W.append(list(weight.iloc[i]))
-
-    std = list(weight.iloc[4])
-    mean = list(weight.iloc[5])
-    return W, std, mean
-
-def choixpeau(predicted):
-    count = 0
-    house = []
-    max = [0.0,0]
-    i = 1
-    for each in predicted :
-        if each > max[0] :
-            max[0] = float(each)
-            max[1] = i
-        if i == 4:
-            i = 0
-            house.append(max[1])
-            max = [0.0,0]
-        i += 1
-        count += 1
-    return (house)
 
 def print_choix(prediction, filename='./houses.csv') :
     f = open(filename, 'w+')
@@ -84,23 +43,31 @@ def print_choix(prediction, filename='./houses.csv') :
         f.writelines([f'{i}',',',f'{houses[each - 1]}','\n'])
         i += 1
 
-def main(filename):
-    W = []
-    prediction = []
+def standardize(X, mean, std):
+    return (X - mean) / std
+
+def get_weight():
     try :
-        X_test = pd.read_csv(filename)
+        return pd.read_csv("./datasets/weights.csv")
     except :
-        print("Can't open file")
-        return 0
-    W, std, mean = parse_weight(W)
-    X_test = clean_dataframe(X_test, std, mean)
-    prediction = predict(X_test, W)
-    prediction = choixpeau(prediction)
-    print_choix(prediction)
+        raise Exception("File not found or error while opening the file")
+
+def log_reg_predict():
+    describe = Describe("./datasets/dataset_test.csv")
+    describe.agregate()
+    agregated_df = describe.aggregated_df[SELECTED_FEATURES]
+    df = describe.df[SELECTED_FEATURES]
+    standardize_df = pd.DataFrame()
+
+    for col in df:
+        standardize_df[col] = standardize(df[col], agregated_df[col]["mean"], agregated_df[col]["std"])
+    standardize_df = standardize_df.fillna(0)
+
+    W = get_weight()
+
+    prediction = LogRegPredict(standardize_df, W)
+    prediction.predict()
+    prediction.choixpeau()
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("dataset", type=str, help="Input dataset")
-    args = parser.parse_args()
-
-    main(args.dataset)
+    log_reg_predict()

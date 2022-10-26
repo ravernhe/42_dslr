@@ -1,6 +1,4 @@
 import argparse
-from re import S
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from describe import Describe
@@ -20,13 +18,13 @@ class LogReg():
 
     def save_as_csv(self):
         with open('datasets/weights.csv', 'w') as f:
-            w = csv.writer(f,)
+            w = csv.writer(f)
             w.writerow(self.W.keys())
             for c in range(len(SELECTED_FEATURES)):
                 row = [self.W[house][c] for house in self.W.keys()]
                 w.writerow(row)
 
-    def one_vs_all(self) :
+    def one_vs_all(self):
         for house in self.X.index.unique():
             self.y = self.X.index.map(lambda x: 0 if x != house else 1)
             self.cost[house], self.W[house] = self.binary_classifier()
@@ -63,7 +61,7 @@ def logreg_train(iter, eta):
     standardize_df = pd.DataFrame()
 
     for col in df:
-        standardize_df[col] = standardize(df[col], agregated_df[col]["mean"], agregated_df["Charms"]["std"])
+        standardize_df[col] = standardize(df[col], agregated_df[col]["mean"], agregated_df[col]["std"])
 
     standardize_df = standardize_df.fillna(0)
     logreg = LogReg(standardize_df, iter, eta)

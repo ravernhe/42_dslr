@@ -1,6 +1,5 @@
 """
 Put these files in the same folder as `houses.csv` and `dataset_truth.csv`.
-
 Usage:
     $ python evaluate.py
 """
